@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es-CR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0D0D0D">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Rifa JSportCode</title>
+<meta name="description" content="Números disponibles de la Gran Rifa JSportCode 2026.">
+<link rel="icon" href="logo.png">
+<style>
+  :root { --orange:#FF6000; --black:#0D0D0D; --ink:#555; --line:#E2E2E2; --taken:#E9E9E9; --taken-ink:#8A8A8A; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#fff; color:var(--black); font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; line-height:1.4; }
+  header { background:var(--black); color:#fff; padding:22px 16px; }
+  .wrap { max-width:720px; margin:0 auto; }
+  .brand { display:flex; align-items:center; gap:14px; }
+  .brand img { width:68px; height:68px; border-radius:50%; flex:none; }
+  h1 { margin:0; font-size:clamp(21px,5.5vw,30px); font-weight:900; letter-spacing:.01em; }
+  header p { margin:2px 0 0; color:#ddd; font-size:15px; }
+  main { padding:18px 16px 32px; }
+  .count { display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .count b { font-size:clamp(30px,9vw,42px); font-weight:900; color:var(--orange); font-variant-numeric:tabular-nums; }
+  .count span { color:var(--ink); }
+  .bar { height:10px; background:var(--taken); border-radius:5px; overflow:hidden; margin:8px 0 16px; }
+  .bar i { display:block; height:100%; background:var(--orange); transition:width .3s; }
+  .grid { display:grid; grid-template-columns:repeat(10,1fr); gap:clamp(3px,1vw,7px); }
+  .n { aspect-ratio:1; display:grid; place-items:center; border-radius:clamp(4px,1vw,9px); font-weight:800; font-size:clamp(12px,3.6vw,21px); font-variant-numeric:tabular-nums; background:var(--orange); color:var(--black); }
+  .n.off { background:var(--taken); color:var(--taken-ink); text-decoration:line-through; }
+  .legend { display:flex; gap:18px; margin:14px 0; font-size:14px; flex-wrap:wrap; }
+  .legend span { display:inline-flex; align-items:center; gap:6px; }
+  .legend i { width:15px; height:15px; border-radius:4px; background:var(--orange); }
+  .legend i.off { background:var(--taken); }
+  .card { border:1px solid var(--line); border-radius:12px; padding:14px; margin-top:6px; }
+  .card h2 { margin:0 0 4px; font-size:16px; }
+  .card p { margin:0; color:var(--ink); font-size:15px; }
+  .updated { color:var(--ink); font-size:13px; margin-top:14px; text-align:center; }
+  .error { background:#FFE3D1; border-radius:10px; padding:10px 12px; margin-bottom:12px; font-size:14px; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap brand">
+    <img src="logo.png" alt="JSportCode" width="68" height="68">
+    <div>
+      <h1 id="title">Rifa JSportCode</h1>
+      <p id="sub">Números disponibles</p>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+  <div class="error" id="error" role="status" hidden>No se pudo actualizar. Revisa tu conexión.</div>
+  <div class="count"><div><b id="left">—</b> <span id="leftLabel">disponibles</span></div><span id="price"></span></div>
+  <div class="bar" aria-hidden="true"><i id="bar" style="width:0"></i></div>
+  <div class="grid" id="grid" role="list" aria-label="Números de la rifa"></div>
+  <div class="legend"><span><i></i>Disponible</span><span><i class="off"></i>Ocupado</span></div>
+  <div class="card">
+    <h2>Premios</h2>
+    <p>2 pares de tenis y 1 par de Crocs, a elección del ganador.</p>
+  </div>
+  <p class="updated" id="updated"></p>
+</main>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2, "0");
+  const money = (v) => "₡" + String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  const cells = [];
+  for (let n = 0; n < 100; n++) {
+    const c = document.createElement("div");
+    c.className = "n";
+    c.textContent = pad(n);
+    c.setAttribute("role", "listitem");
+    $("grid").appendChild(c);
+    cells.push(c);
+  }
+  function render(d) {
+    const free = new Set(d.available);
+    cells.forEach((c, n) => {
+      const on = free.has(n);
+      c.classList.toggle("off", !on);
+      c.setAttribute("aria-label", `Número ${pad(n)}, ${on ? "disponible" : "ocupado"}`);
+    });
+    $("title").textContent = d.name;
+    const date = new Date(d.drawDate + "T12:00:00Z").toLocaleDateString("es-CR", { timeZone: "UTC", weekday: "long", day: "numeric", month: "long" });
+    $("sub").textContent = "Sorteo: " + date;
+    $("left").textContent = free.size;
+    $("leftLabel").textContent = (free.size === 1 ? "disponible" : "disponibles") + " de " + d.total;
+    $("price").textContent = money(d.price) + " por número";
+    $("bar").style.width = (free.size / d.total) * 100 + "%";
+    $("updated").textContent = "Actualizado: " + new Date(d.updatedAt).toLocaleString("es-CR", { timeZone: "America/Costa_Rica", dateStyle: "medium", timeStyle: "short" });
+  }
+  async function load() {
+    try {
+      const r = await fetch("data.json?t=" + Date.now(), { cache: "no-store" });
+      if (!r.ok) throw new Error();
+      render(await r.json());
+      $("error").hidden = true;
+    } catch { $("error").hidden = false; }
+  }
+  load();
+  setInterval(load, 30000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
+</script>
+</body>
+</html>
