@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0D0D0D">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self'; connect-src https://nunweaelgpwkzxpsquef.supabase.co; base-uri 'none'; form-action 'none'">
 <title>Rifa JSportCode</title>
 <meta name="description" content="Números disponibles de la Gran Rifa JSportCode 2026.">
 <link rel="icon" href="logo.png">
@@ -93,14 +93,14 @@
   }
   async function load() {
     try {
-      const r = await fetch("data.json?t=" + Date.now(), { cache: "no-store" });
+      const r = await fetch("https://nunweaelgpwkzxpsquef.supabase.co/functions/v1/rifa-api/public", { cache: "no-store" });
       if (!r.ok) throw new Error();
       render(await r.json());
       $("error").hidden = true;
     } catch { $("error").hidden = false; }
   }
   load();
-  setInterval(load, 30000);
+  setInterval(load, 15000);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
 </script>
 </body>
